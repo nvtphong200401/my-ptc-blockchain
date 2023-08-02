@@ -238,9 +238,9 @@ const updateUnspentTxOuts = (aTransactions: Transaction[], aUnspentTxOuts: Unspe
     return resultingUnspentTxOuts;
 };
 
-const processTransactions = (aTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[], blockIndex: number) => {
+const processTransactions = (aTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[], blockIndex: number, malicious: boolean=false) => {
 
-    if (!validateBlockTransactions(aTransactions, aUnspentTxOuts, blockIndex)) {
+    if (!malicious && !validateBlockTransactions(aTransactions, aUnspentTxOuts, blockIndex)) {
         console.log('invalid block transactions');
         return null;
     }

@@ -2,14 +2,11 @@
   "name": "my-ptc-blockchain",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "prestart": "npm run compile",
     "start": "node src/main.js",
     "compile": "tsc"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "axios": "^0.16.2",
     "body-parser": "^1.15.2",

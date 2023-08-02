@@ -50,12 +50,22 @@ const findUnspentTxOuts = (ownerAddress: string, unspentTxOuts: UnspentTxOut[]) 
     return _.filter(unspentTxOuts, (uTxO: UnspentTxOut) => uTxO.address === ownerAddress);
 };
 
-const findTxOutsForAmount = (amount: number, myUnspentTxOuts: UnspentTxOut[]) => {
+const findTxOutsForAmount = (amount: number, myUnspentTxOuts: UnspentTxOut[], malicious: boolean=false) => {
     let currentAmount = 0;
     const includedUnspentTxOuts = [];
     for (const myUnspentTxOut of myUnspentTxOuts) {
-        includedUnspentTxOuts.push(myUnspentTxOut);
-        currentAmount = currentAmount + myUnspentTxOut.amount;
+        if (malicious) {
+            // Edit first tx in a such way that its amount equals the needed one
+            const fake_tx = new UnspentTxOut(
+                myUnspentTxOut.txOutId, myUnspentTxOut.txOutIndex, myUnspentTxOut.address, amount);
+            includedUnspentTxOuts.push(myUnspentTxOut);
+            currentAmount = amount;
+        } 
+        else {
+            includedUnspentTxOuts.push(myUnspentTxOut);
+            currentAmount = currentAmount + myUnspentTxOut.amount;
+        }
+        
         if (currentAmount >= amount) {
             const leftOverAmount = currentAmount - amount;
             return {includedUnspentTxOuts, leftOverAmount};
@@ -63,8 +73,8 @@ const findTxOutsForAmount = (amount: number, myUnspentTxOuts: UnspentTxOut[]) =>
     }
 
     const eMsg = 'Cannot create transaction from the available unspent transaction outputs.' +
-        ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts);
-    throw Error(eMsg);
+    ' Required amount:' + amount + '. Available unspentTxOuts:' + JSON.stringify(myUnspentTxOuts);
+    throw Error(eMsg);    
 };
 
 const createTxOuts = (receiverAddress: string, myAddress: string, amount, leftOverAmount: number) => {
@@ -99,7 +109,7 @@ const filterTxPoolTxs = (unspentTxOuts: UnspentTxOut[], transactionPool: Transac
 };
 
 const createTransaction = (receiverAddress: string, amount: number, privateKey: string,
-                           unspentTxOuts: UnspentTxOut[], txPool: Transaction[]): Transaction => {
+                           unspentTxOuts: UnspentTxOut[], txPool: Transaction[], malicious: boolean=false): Transaction => {
 
     console.log('txPool: %s', JSON.stringify(txPool));
     const myAddress: string = getPublicKey(privateKey);
@@ -108,7 +118,7 @@ const createTransaction = (receiverAddress: string, amount: number, privateKey: 
     const myUnspentTxOuts = filterTxPoolTxs(myUnspentTxOutsA, txPool);
 
     // filter from unspentOutputs such inputs that are referenced in pool
-    const {includedUnspentTxOuts, leftOverAmount} = findTxOutsForAmount(amount, myUnspentTxOuts);
+    const {includedUnspentTxOuts, leftOverAmount} = findTxOutsForAmount(amount, myUnspentTxOuts, malicious);
 
     const toUnsignedTxIn = (unspentTxOut: UnspentTxOut) => {
         const txIn: TxIn = new TxIn();

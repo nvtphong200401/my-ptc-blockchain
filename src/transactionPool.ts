@@ -7,13 +7,13 @@ const getTransactionPool = () => {
     return _.cloneDeep(transactionPool);
 };
 
-const addToTransactionPool = (tx: Transaction, unspentTxOuts: UnspentTxOut[]) => {
+const addToTransactionPool = (tx: Transaction, unspentTxOuts: UnspentTxOut[], malicious: boolean=false) => {
 
-    if (!validateTransaction(tx, unspentTxOuts)) {
+    if (!malicious && !validateTransaction(tx, unspentTxOuts)) {
         throw Error('Trying to add invalid tx to pool');
     }
 
-    if (!isValidTxForPool(tx, transactionPool)) {
+    if (!malicious && !isValidTxForPool(tx, transactionPool)) {
         throw Error('Trying to add invalid tx to pool');
     }
     console.log('adding to txPool: %s', JSON.stringify(tx));
@@ -68,4 +68,8 @@ const isValidTxForPool = (tx: Transaction, aTtransactionPool: Transaction[]): bo
     return true;
 };
 
-export {addToTransactionPool, getTransactionPool, updateTransactionPool};
+const clearTransactionPool = () => {
+    transactionPool = []
+}
+
+export {addToTransactionPool, getTransactionPool, updateTransactionPool, clearTransactionPool};

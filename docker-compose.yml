@@ -1,0 +1,30 @@
+version: '2'
+services:
+  node1:
+    build:
+      context: ./
+    environment:
+      - PEERS=ws://ptc-node2-1:6001
+    ports:
+    - "3001:3001"
+    networks:
+    - coin
+  node2:
+    build:
+      context: ./
+    environment:
+      - PEERS=ws://ptc-node3-1:6001
+    ports:
+    - "3002:3001"
+    networks:
+    - coin
+  node3:
+    build:
+      context: ./
+    ports:
+    - "3003:3001"
+    networks:
+    - coin
+
+networks:
+  coin: {}
